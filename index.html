@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>धनखड़ सीएससी सेंटर ढाकला - Money Transfer Receipt</title>
+    <style>
+        :root {
+            --primary: #005a36;
+            --primary-dark: #003d24;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --border: #d1d5db;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1150px;
+            width: 100%;
+        }
+
+        .form-section {
+            flex: 1;
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-top: 6px solid var(--primary);
+        }
+
+        .preview-section {
+            width: 360px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: fit-content;
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 18px;
+            margin-bottom: 14px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 6px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 3px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 10px;
+            background: #f9fafb;
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: normal;
+            margin-bottom: 0;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .calc-summary {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        .calc-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+        }
+
+        .calc-row.total {
+            border-top: 1px dashed #059669;
+            padding-top: 5px;
+            margin-top: 5px;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .btn-print {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-print:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* --- Ultra-Compact 80mm Thermal Receipt Styling --- */
+        .thermal-receipt {
+            width: 72mm;
+            background: #fff;
+            padding: 4px 2px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #000;
+            border: 1px solid #ddd;
+            font-size: 10px;
+            line-height: 1.15;
+        }
+
+        .receipt-header {
+            text-align: center;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 4px;
+            margin-bottom: 4px;
+        }
+
+        .receipt-header h3 {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .receipt-header p {
+            font-size: 8px;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+            word-break: break-all;
+        }
+
+        .divider {
+            border-top: 1px dashed #000;
+            margin: 3px 0;
+        }
+
+        .receipt-status {
+            text-align: center;
+            font-weight: bold;
+            font-size: 10px;
+            padding: 2px;
+            margin: 3px 0;
+            border: 1px solid #000;
+        }
+
+        .signature-block {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+            padding-top: 2px;
+            font-size: 8px;
+            font-weight: bold;
+        }
+
+        .sig-box {
+            width: 48%;
+            text-align: center;
+            border-top: 1px dotted #000;
+        }
+
+        /* STRICT 80mm THERMAL PRINTER ALIGNMENT FROM TOP-LEFT (2mm MARGINS) */
+        @media print {
+            @page {
+                size: 80mm auto;
+                margin: 2mm 0 0 2mm;
+            }
+
+            html, body {
+                background: #fff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 76mm;
+            }
+
+            .form-section, .preview-title, .btn-print {
+                display: none !important;
+            }
+
+            .container {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .preview-section {
+                width: 72mm !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                background: transparent !important;
+                align-items: flex-start !important;
+            }
+
+            .thermal-receipt {
+                width: 72mm !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Form Inputs Section -->
+    <div class="form-section">
+        <h2>धनखड़ सीएससी सेंटर - Transfer Details</h2>
+        
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Payment App / Mode</label>
+                <select id="appType" onchange="toggleCustomApp(); computeAndRefresh();">
+                    <option value="PhonePe">PhonePe</option>
+                    <option value="Paytm">Paytm</option>
+                    <option value="Google Pay">Google Pay</option>
+                    <option value="Amazon Pay">Amazon Pay</option>
+                    <option value="OTHER">OTHER (Custom Name)</option>
+                </select>
+            </div>
+            <div class="form-group" id="customAppGroup" style="display:none;">
+                <label>Custom App Name</label>
+                <input type="text" id="customAppName" placeholder="Enter App Name" oninput="computeAndRefresh()">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Transfer Type</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="txType" value="transfer" checked onchange="computeAndRefresh();"> Transfer</label>
+                    <label><input type="radio" name="txType" value="cash" onchange="computeAndRefresh();"> Taking Cash</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Transferred By</label>
+                <select id="transferredBy" onchange="computeAndRefresh()">
+                    <option value="Ashish">Ashish</option>
+                    <option value="Aman">Aman</option>
+                    <option value="Pooja">Pooja</option>
+                    <option value="Meena">Meena</option>
+                    <option value="Papa Ji">Papa Ji</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Transfer To (Name)</label>
+                <input type="text" id="toName" placeholder="Recipient Name" oninput="computeAndRefresh()">
+            </div>
+            <div class="form-group">
+                <label>UPI ID / Phone Number</label>
+                <input type="text" id="upiOrPhone" placeholder="UPI / Phone" oninput="computeAndRefresh()">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Bank Name (Optional)</label>
+                <input type="text" id="bankName" placeholder="e.g. SBI, PNB" oninput="computeAndRefresh()">
+            </div>
+            <div class="form-group">
+                <label>Account Number (Optional)</label>
+                <input type="text" id="accountNo" placeholder="Bank Account Number" oninput="computeAndRefresh()">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>IFSC Code (Optional)</label>
+                <input type="text" id="ifscCode" placeholder="IFSC Code" oninput="computeAndRefresh()">
+            </div>
+            <div class="form-group">
+                <label>UTR NO. / Ref No.</label>
+                <input type="text" id="utrNo" placeholder="UTR Number" oninput="computeAndRefresh()">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Amount (₹)</label>
+                <input type="number" id="amount" placeholder="e.g. 5000" min="1" oninput="computeAndRefresh()">
+            </div>
+            <div class="form-group">
+                <label>Date and Time</label>
+                <input type="datetime-local" id="dateTime" onchange="computeAndRefresh()">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Charge Mode</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="chargeMode" value="separate" checked onchange="computeAndRefresh();"> Pay Separate</label>
+                    <label><input type="radio" name="chargeMode" value="deduct" onchange="computeAndRefresh();"> Cut from Amt</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Discount on Charges (₹)</label>
+                <input type="number" id="discount" value="0" min="0" oninput="computeAndRefresh()">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Customer Paid Amount (₹)</label>
+                <input type="number" id="paidAmount" placeholder="Amount Paid by Customer" oninput="computeAndRefresh()">
+            </div>
+            <div class="form-group">
+                <label>Transaction Status</label>
+                <select id="txStatus" onchange="toggleStatusReason(); computeAndRefresh();">
+                    <option value="Transfer Successful">Transfer Successful</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Failed">Failed</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group" id="pendingReasonGroup" style="display:none;">
+            <label>Pending Reason</label>
+            <select id="pendingReason" onchange="computeAndRefresh()">
+                <option value="UPI ERROR">UPI ERROR</option>
+                <option value="UPI SERVER DOWN">UPI SERVER DOWN</option>
+                <option value="LOW BALANCE (Cash Refunded)">LOW BALANCE (Cash Refunded)</option>
+                <option value="LOW BALANCE (Transfer Later)">LOW BALANCE (Transfer Later)</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="failedReasonGroup" style="display:none;">
+            <label>Failed Cash Status</label>
+            <select id="failedReason" onchange="computeAndRefresh()">
+                <option value="Cash Refunded">Cash Refunded</option>
+                <option value="Cash Not Refunded">Cash Not Refunded</option>
+            </select>
+        </div>
+
+        <div class="calc-summary">
+            <div class="calc-row"><span>Base Charge:</span><span id="calcBaseCharge">₹0</span></div>
+            <div class="calc-row"><span>Discount:</span><span id="calcDiscount">₹0</span></div>
+            <div class="calc-row"><span>Final Fee:</span><span id="calcFinalFee">₹0</span></div>
+            <div class="calc-row total"><span>Total Payable:</span><span id="calcTotalPayable">₹0</span></div>
+            <div class="calc-row"><span>Change Return / Short:</span><span id="calcChangeReturn">₹0</span></div>
+        </div>
+    </div>
+
+    <!-- 80mm Print Receipt Preview Section -->
+    <div class="preview-section">
+        <h3 class="preview-title" style="margin-bottom: 10px; font-size: 15px;">80mm Receipt Preview</h3>
+        
+        <div class="thermal-receipt" id="receipt">
+            <div class="receipt-header">
+                <h3>धनखड़ सीएससी सेंटर ढाकला</h3>
+                <p>संचालक:- आशीष धनखड़</p>
+                <p>सीएससी आईडी:- 316521760018</p>
+                <p>मोबाइल:- 9996036806</p>
+                <p>जीमेल:- ashishdhankar704@gmail.com</p>
+            </div>
+
+            <div class="receipt-row"><span>App/Mode:</span><b id="rApp">PhonePe</b></div>
+            <div class="receipt-row"><span>Date/Time:</span><span id="rDateTime">-</span></div>
+            <div class="receipt-row"><span>Trans. By:</span><span id="rOperator">Ashish</span></div>
+
+            <div class="divider"></div>
+
+            <div class="receipt-row"><span>To Name:</span><b id="rToName">-</b></div>
+            <div class="receipt-row"><span>UPI/No:</span><span id="rUpiOrPhone">-</span></div>
+            
+            <div id="rBankDetails" style="display: none;">
+                <div class="receipt-row"><span>Bank:</span><span id="rBankName">-</span></div>
+                <div class="receipt-row"><span>A/C No:</span><span id="rAccountNo">-</span></div>
+                <div class="receipt-row"><span>IFSC:</span><span id="rIfsc">-</span></div>
+            </div>
+
+            <div class="receipt-row"><span>UTR No:</span><span id="rUtr">-</span></div>
+
+            <div class="divider"></div>
+
+            <div class="receipt-row"><span>Amount Transferred:</span><b id="rAmount">₹0</b></div>
+            <div class="receipt-row"><span>Transfer Fee:</span><span id="rFee">₹0</span></div>
+            <div class="receipt-row"><span>Discount:</span><span id="rDiscount">₹0</span></div>
+            <div class="receipt-row" style="font-weight: bold;"><span>Total Amount:</span><span id="rTotal">₹0</span></div>
+            <div class="receipt-row"><span>Paid by Customer:</span><span id="rPaid">₹0</span></div>
+            <div class="receipt-row"><span>Change Return:</span><span id="rChange">₹0</span></div>
+
+            <div class="divider"></div>
+
+            <div class="receipt-status" id="rStatus">TRANSFER SUCCESSFUL</div>
+            <div style="font-size: 8px; text-align: center; margin-bottom: 2px;" id="rStatusDetail"></div>
+
+            <div class="signature-block">
+                <div class="sig-box">ग्राहक के हस्ताक्षर<br>(Customer Sign)</div>
+                <div class="sig-box">संचालक के हस्ताक्षर<br>(Operator Sign)</div>
+            </div>
+            
+            <p style="text-align: center; font-size: 8px; margin-top: 6px;">*** धन्यवाद! फिर पधारें ***</p>
+        </div>
+
+        <button class="btn-print" onclick="window.print()">Print 80mm Slip</button>
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('dateTime').value = now.toISOString().slice(0,16);
+        computeAndRefresh();
+    };
+
+    function toggleCustomApp() {
+        const appType = document.getElementById('appType').value;
+        document.getElementById('customAppGroup').style.display = appType === 'OTHER' ? 'block' : 'none';
+    }
+
+    function toggleStatusReason() {
+        const status = document.getElementById('txStatus').value;
+        document.getElementById('pendingReasonGroup').style.display = status === 'Pending' ? 'block' : 'none';
+        document.getElementById('failedReasonGroup').style.display = status === 'Failed' ? 'block' : 'none';
+    }
+
+    let computedBaseFee = 0;
+    let computedFinalFee = 0;
+    let computedTotalPayable = 0;
+    let computedNetTransferred = 0;
+
+    function computeAndRefresh() {
+        const amt = parseFloat(document.getElementById('amount').value) || 0;
+        const discount = parseFloat(document.getElementById('discount').value) || 0;
+        const paid = parseFloat(document.getElementById('paidAmount').value) || 0;
+        const isCash = document.querySelector('input[name="txType"]:checked').value === 'cash';
+        const isCutFromAmt = document.querySelector('input[name="chargeMode"]:checked').value === 'deduct';
+
+        if (amt <= 0) {
+            computedBaseFee = 0;
+            computedFinalFee = 0;
+            computedTotalPayable = 0;
+            computedNetTransferred = 0;
+            updateUI(0, 0, 0, 0, "₹0");
+            return;
+        }
+
+        let slabVal = amt;
+        if (isCash) {
+            slabVal = Math.ceil(amt / 1000) * 1000;
+            if (slabVal === 0) slabVal = 1000;
+            computedBaseFee = slabVal * 0.01;
+        } else {
+            if (slabVal <= 5000) {
+                computedBaseFee = Math.ceil(slabVal / 1000) * 10;
+            } else if (slabVal <= 20000) {
+                computedBaseFee = Math.ceil(slabVal / 1000) * 15;
+            } else {
+                computedBaseFee = Math.ceil(slabVal / 1000) * 20;
+            }
+        }
+
+        computedFinalFee = Math.max(0, computedBaseFee - discount);
+
+        if (isCash) {
+            computedNetTransferred = amt;
+            computedTotalPayable = amt + computedFinalFee;
+        } else {
+            if (isCutFromAmt) {
+                computedNetTransferred = Math.max(0, amt - computedFinalFee);
+                computedTotalPayable = amt;
+            } else {
+                computedNetTransferred = amt;
+                computedTotalPayable = amt + computedFinalFee;
+            }
+        }
+
+        let changeText = "₹0";
+        if (paid > 0) {
+            let diff = paid - computedTotalPayable;
+            if (diff >= 0) {
+                changeText = "₹" + diff.toLocaleString('en-IN');
+            } else {
+                changeText = "Short ₹" + Math.abs(diff).toLocaleString('en-IN');
+            }
+        }
+
+        updateUI(computedBaseFee, discount, computedFinalFee, computedTotalPayable, changeText);
+        renderReceiptValues();
+    }
+
+    function updateUI(base, disc, fee, total, changeStr) {
+        document.getElementById('calcBaseCharge').innerText = "₹" + base.toLocaleString('en-IN');
+        document.getElementById('calcDiscount').innerText = "₹" + disc.toLocaleString('en-IN');
+        document.getElementById('calcFinalFee').innerText = "₹" + fee.toLocaleString('en-IN');
+        document.getElementById('calcTotalPayable').innerText = "₹" + total.toLocaleString('en-IN');
+        document.getElementById('calcChangeReturn').innerText = changeStr;
+    }
+
+    function renderReceiptValues() {
+        const appSelect = document.getElementById('appType').value;
+        const appName = appSelect === 'OTHER' ? (document.getElementById('customAppName').value || 'Custom App') : appSelect;
+        document.getElementById('rApp').innerText = appName;
+
+        const dtVal = document.getElementById('dateTime').value;
+        if (dtVal) {
+            const dt = new Date(dtVal);
+            document.getElementById('rDateTime').innerText = dt.toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' });
+        } else {
+            document.getElementById('rDateTime').innerText = '-';
+        }
+
+        document.getElementById('rOperator').innerText = document.getElementById('transferredBy').value;
+        document.getElementById('rToName').innerText = document.getElementById('toName').value || '-';
+        document.getElementById('rUpiOrPhone').innerText = document.getElementById('upiOrPhone').value || '-';
+        document.getElementById('rUtr').innerText = document.getElementById('utrNo').value || '-';
+
+        const bank = document.getElementById('bankName').value;
+        const acc = document.getElementById('accountNo').value;
+        const ifsc = document.getElementById('ifscCode').value;
+        
+        if (bank || acc || ifsc) {
+            document.getElementById('rBankDetails').style.display = 'block';
+            document.getElementById('rBankName').innerText = bank || '-';
+            document.getElementById('rAccountNo').innerText = acc || '-';
+            document.getElementById('rIfsc').innerText = ifsc || '-';
+        } else {
+            document.getElementById('rBankDetails').style.display = 'none';
+        }
+
+        const discount = parseFloat(document.getElementById('discount').value) || 0;
+        const paid = parseFloat(document.getElementById('paidAmount').value) || 0;
+
+        document.getElementById('rAmount').innerText = "₹" + computedNetTransferred.toLocaleString('en-IN');
+        document.getElementById('rFee').innerText = "₹" + computedFinalFee.toLocaleString('en-IN');
+        document.getElementById('rDiscount').innerText = "₹" + discount.toLocaleString('en-IN');
+        document.getElementById('rTotal').innerText = "₹" + computedTotalPayable.toLocaleString('en-IN');
+        document.getElementById('rPaid').innerText = "₹" + paid.toLocaleString('en-IN');
+        
+        let changeVal = paid - computedTotalPayable;
+        document.getElementById('rChange').innerText = paid > 0 ? (changeVal >= 0 ? "₹" + changeVal.toLocaleString('en-IN') : "Short ₹" + Math.abs(changeVal).toLocaleString('en-IN')) : "₹0";
+
+        const status = document.getElementById('txStatus').value;
+        const rStatus = document.getElementById('rStatus');
+        const rStatusDetail = document.getElementById('rStatusDetail');
+
+        rStatus.innerText = status.toUpperCase();
+        if (status === 'Transfer Successful') {
+            rStatusDetail.innerText = '';
+        } else if (status === 'Pending') {
+            rStatusDetail.innerText = "Reason: " + document.getElementById('pendingReason').value;
+        } else if (status === 'Failed') {
+            rStatusDetail.innerText = "Status: " + document.getElementById('failedReason').value;
+        }
+    }
+</script>
+
+</body>
+</html>
